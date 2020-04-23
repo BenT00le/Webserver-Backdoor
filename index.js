@@ -1,6 +1,7 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+
 var exec = require('child_process').exec, child;
 
 //create the http server
@@ -20,21 +21,26 @@ const server = http.createServer((req, res) => {
     // out the command at the end of req.url
     else if(req.url.split('/')[1] === 'exec')
     {
+        exec(req.url.split('/')[2],
+        function (error, stdout, stderr) {
+            console.log('stdout: ' + stdout);
+            console.log('stderr: ' + stderr);
+            fs.writeFile(path.join(__dirname,'public/css','about.html'), stdout ,(err) =>
+                {if(err) throw err;});
+            if (error !== null) {
+                 console.log('exec error: ' + error);
+            }
+        });
+
         fs.readFile(path.join(__dirname,'public','about.html'), (err, data) =>
         {
-            if(err) throw err;
-            res.writeHead(200, {'Content-Type': 'text/html'});
-            exec(req.url.split('/')[2],
-                function (error, stdout, stderr) {
-                    console.log('stdout: ' + stdout);
-                    console.log('stderr: ' + stderr);
-                    data = stdout;
-                    if (error !== null) {
-                         console.log('exec error: ' + error);
-                    }
-                });
-            res.end(data);
+        console.log('exec');
+        if(err) throw err;
+        res.writeHead(200, {'Content-Type': 'text/html'});
+
+        res.end(data);
         });
+        
     }
 
 
