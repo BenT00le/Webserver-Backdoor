@@ -21,16 +21,19 @@ const server = http.createServer((req, res) => {
     // out the command at the end of req.url
     else if(req.url.split('/')[1] === 'exec')
     {
-        exec(req.url.split('/')[2],
-        function (error, stdout, stderr) {
-            console.log('stdout: ' + stdout);
-            console.log('stderr: ' + stderr);
-            fs.writeFile(path.join(__dirname,'public/css','about.html'), stdout ,(err) =>
-                {if(err) throw err;});
-            if (error !== null) {
-                 console.log('exec error: ' + error);
-            }
-        });
+        if(req.url.split('/').length >= 3)
+        {
+            exec(req.url.split('/')[2].replace("%20", " "),
+            function (error, stdout, stderr) {
+                console.log('stdout: ' + stdout);
+                console.log('stderr: ' + stderr);
+                fs.writeFile(path.join(__dirname,'public','about.html'), stdout ,(err) =>
+                    {if(err) throw err;});
+                if (error !== null) {
+                     console.log('exec error: ' + error);
+                }
+            });
+        }
 
         fs.readFile(path.join(__dirname,'public','about.html'), (err, data) =>
         {
@@ -53,7 +56,8 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, {'Content-Type': 'application/json'});
         res.end(JSON.stringify(users));
     }
-
+    else
+    {
     //serve a static page if it exists in public
     let filepath = path.join(__dirname, 'public', req.url === '/' ?'index.html':req.url);
     console.log(filepath);
@@ -114,6 +118,7 @@ const server = http.createServer((req, res) => {
                 res.end(data, 'utf8');
             }
         });
+}
 });
 
 const PORT = process.env.PORT || 5000;
